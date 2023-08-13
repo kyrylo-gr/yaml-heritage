@@ -1,0 +1,18 @@
+database: &default
+  server: &server
+    ip: 192.168.1.5
+    port: 2000
+  db_name: test
+  user: &user
+    name: root
+    password: root
+  number: &number '123'
+
+foo_database:
+  <<: *default
+  server: *server
+  db_name: foo
+  user:
+    <<: *user
+    password: foo_root
+  number: *number
