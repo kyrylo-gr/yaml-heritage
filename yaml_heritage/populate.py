@@ -36,10 +36,10 @@ def populate_class_from_dict(
                 data_for_this_variable = kwargs[variable]
             value = convert_value_known_class(data_for_this_variable, cls_name)
 
-            try:
-                value.data = data_for_this_variable
-            except Exception:
-                pass
+            # try:
+            #     value.data = data_for_this_variable
+            # except Exception:
+            #     pass
 
             cls_origin = get_cls_origin(cls_name)
             if cls_origin is Variable and set_variable_func is not None:

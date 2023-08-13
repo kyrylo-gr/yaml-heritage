@@ -28,20 +28,34 @@ class ImplementationError(Exception):
     """Raise on an implementation error using drawable."""
 
 
-class Heritage(Generic[_RV]):
+class SimpleCall(type):
+    """Use this meta class if you want to control the call of init function.
+
+    Don't forget to run __init__ inside __new__ function"""
+
+    def __call__(cls, *args, **kwargs):
+        return cls.__new__(cls, *args, **kwargs)
+
+
+class Heritage(Generic[_RV], metaclass=SimpleCall):
     # __annotations__: Dict[str, Union[Any, Type["Heritage"]]]
     _folder: str
 
-    def __init__(self, **_):
+    def __init__(self, **__):
         super().__init__()
 
-    def __new__(cls, **kwargs):
+    # @classmethod
+    def __new__(cls, *args, **kwargs):
         """Init."""
         # cls.inherit_annotations()
-        obj = object.__new__(cls)
+        obj = super().__new__(cls)
+        if len(args) == 1 and hasattr(args[0], '__dict__'):
+            kwargs.update(args[0].__dict__)
+            return cls.__new__(cls, **kwargs)
         populate.populate_class_from_dict(
             obj, set_variable_func=cls._set_variable, **kwargs
         )
+        obj.__init__(**kwargs)
         return obj
 
     @classmethod
