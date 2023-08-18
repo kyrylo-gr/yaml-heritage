@@ -1,6 +1,5 @@
-from copy import deepcopy, copy
-from typing import Dict, Optional, TypeVar, Union, List
-
+from copy import copy, deepcopy
+from typing import Dict, List, Optional, TypeVar, Union
 
 _T = TypeVar("_T")
 

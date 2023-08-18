@@ -1,5 +1,6 @@
 from copy import deepcopy
 from typing import Any, Dict, Optional
+
 from .generic_types import Variable, Variation
 
 
@@ -26,7 +27,7 @@ def populate_class_from_dict(
     for variable, cls_name in inherit_annotations(obj).items():
         if variable.startswith("_"):
             pass
-        if variable == "square":
+        if variable == "offset":
             pass
         if variable in kwargs:
             if isinstance(kwargs[variable], dict):
@@ -95,6 +96,9 @@ def convert_list_to_floats(lst):
     """Convert a list of string to int or float if possible."""
     new_lst = []
     for item in lst:
+        if not isinstance(item, str):
+            new_lst.append(item)
+            continue
         try:
             new_lst.append(int(item))
             continue
@@ -115,8 +119,8 @@ def convert_value_known_class(value: Any, cls: Optional[type] = None):
 
     cls_base = get_cls_base(cls)
 
-    if isinstance(value, list):
-        value = convert_list_to_floats(value)
+    # if isinstance(value, list):
+    # value = convert_list_to_floats(value)
 
     if isinstance(value, dict):
         if hasattr(cls_base, '__annotations__'):

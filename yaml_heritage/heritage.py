@@ -1,15 +1,8 @@
-from typing import (
-    Dict,
-    Type,
-    Union,
-    Any,
-    TypeVar,
-    Generic,
-)
 import logging
 from copy import deepcopy
+from typing import Any, Dict, Generic, Type, TypeVar, Union
 
-from . import utils, yaml_utils, populate, dict_utils
+from . import dict_utils, populate, utils, yaml_utils
 
 logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -50,8 +43,9 @@ class Heritage(Generic[_RV], metaclass=SimpleCall):
         # cls.inherit_annotations()
         obj = super().__new__(cls)
         if len(args) == 1 and hasattr(args[0], '__dict__'):
-            kwargs.update(args[0].__dict__)
-            return cls.__new__(cls, **kwargs)
+            data: dict = deepcopy(args[0].__dict__)
+            data.update(**kwargs)
+            return cls.__new__(cls, **data)
         populate.populate_class_from_dict(
             obj, set_variable_func=cls._set_variable, **kwargs
         )

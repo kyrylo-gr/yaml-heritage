@@ -1,4 +1,5 @@
-from typing import Optional, Union, TypeVar
+from typing import Optional, TypeVar, Union
+
 import yaml
 
 _T = TypeVar("_T")

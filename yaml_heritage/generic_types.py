@@ -1,6 +1,13 @@
-from typing import Any, Protocol, Generic, TypeVar, List, TYPE_CHECKING
 from random import shuffle  # noqa
-
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generic,
+    List,
+    Protocol,
+    Sequence,
+    TypeVar,
+)
 
 if TYPE_CHECKING:
     from quick.geometry.csg.node import Node
@@ -23,7 +30,7 @@ class Variable(Protocol, Generic[_T]):  # type: ignore
         ...
 
 
-class Variation(Generic[_TD]):
+class Variation(Sequence[_TD]):
     children: List[_TD]
     _n_iter: int = 0
 
@@ -33,11 +40,11 @@ class Variation(Generic[_TD]):
     def __getitem__(self, key) -> _TD:
         return self.children[key]
 
-    def __iter__(self):
+    def __iter__(self) -> "Variation":
         self._n_iter = 0
         return self
 
-    def __next__(self):
+    def __next__(self) -> _TD:
         if self._n_iter < len(self.children):
             self._n_iter += 1
             return self.children[self._n_iter - 1]
@@ -66,5 +73,5 @@ class Variation(Generic[_TD]):
     def children_expended(self) -> List[_TD]:
         all_children = []
         for child in self.children:
-            all_children += [child]*getattr(child, 'times', 1)
+            all_children += [child] * getattr(child, 'times', 1)
         return all_children
