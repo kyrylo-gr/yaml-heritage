@@ -1,16 +1,5 @@
 from random import shuffle  # noqa
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Generic,
-    List,
-    Protocol,
-    Sequence,
-    TypeVar,
-)
-
-if TYPE_CHECKING:
-    from quick.geometry.csg.node import Node
+from typing import Any, Generic, List, Protocol, Sequence, TypeVar
 
 
 class Drawable(Protocol):
@@ -59,12 +48,6 @@ class Variation(Sequence[_TD]):
 
     def extend(self, children: List[_TD]):
         self.children.extend(children)
-
-    def draw(self, *args, **kwargs) -> List["Node"]:
-        objs = []
-        for child in self.children:
-            objs.append(child.draw(*args, **kwargs))
-        return objs
 
     def shuffle(self) -> None:
         shuffle(self.children)

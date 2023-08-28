@@ -5,7 +5,9 @@ _T1 = TypeVar("_T1")
 _T2 = TypeVar("_T2")
 
 
-def deep_update(base_dict: Dict[str, _T1], update: Dict[str, _T2]) -> Dict[str, Union[_T1, _T2]]:
+def deep_update(
+    base_dict: Dict[str, _T1], update: Dict[str, _T2]
+) -> Dict[str, Union[_T1, _T2]]:
     """Update nested dictionaries."""
     d = deepcopy(base_dict)
     d.update(**update)
@@ -19,6 +21,7 @@ def format_item_to_string(item):
 
 
 def output_dict(data: dict):
+    """Output dictionary in a nice format with tabs and newlines."""
     string = ""
     for key, value in data.items():
         if not key.startswith("_"):

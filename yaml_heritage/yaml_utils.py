@@ -31,6 +31,8 @@ def read_yaml_file(
     if not isinstance(filename, str):
         return filename
     dict_params = load_single_yaml_file(filename, folder)
+    if dict_params is None:
+        raise ValueError(f"File '{filename}' is empty")
     dict_params = expand_file_links(dict_params, folder)
     return dict_params
 

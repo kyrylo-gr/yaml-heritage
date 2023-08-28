@@ -105,6 +105,7 @@ def get_nested_item(
 
 
 def expand_nested_key(key: Union[str, List[str]]) -> List[str]:
+    """Convert link divided by '.' into list."""
     if isinstance(key, str):
         return key.split(".")
     return key

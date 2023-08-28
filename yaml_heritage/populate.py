@@ -1,10 +1,15 @@
 from copy import deepcopy
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Callable
 
 from .generic_types import Variable, Variation
 
 
 def inherit_annotations(cls) -> Dict[str, type]:
+    """Return annotation from class and all parents.
+
+    __annotations__ returns only the annotation of the current class.
+    Therefore we need to go through all parents and collect all annotations.
+    """
     annotations = {}
     mro = cls.__mro__ if hasattr(cls, '__mro__') else cls.__class__.__mro__
     for parent in mro[::-1]:
@@ -14,9 +19,23 @@ def inherit_annotations(cls) -> Dict[str, type]:
 
 
 def populate_class_from_dict(
-    obj, /, data=None, set_variable_func=None, **kwargs
+    obj,
+    /,
+    data: Optional[dict] = None,
+    set_variable_func: Optional[Callable] = None,
+    **kwargs,
 ):
-    """Populate a class from a dictionary based on annotation."""
+    """Populate a class from a dictionary based on annotation.
+
+    `data` and `kwargs` are combined into one dictionary.
+
+    Working principal:
+    -----------------
+    - Every keyword that starts with `_` is directly set as an attribute.
+    - Then very keyword that exists inside class annotation is set.
+    - All values are converted to expected value type.
+    - Values for child can be taken from direct parent.
+    """
     if data:
         kwargs.update(**data)
 
@@ -26,8 +45,6 @@ def populate_class_from_dict(
 
     for variable, cls_name in inherit_annotations(obj).items():
         if variable.startswith("_"):
-            pass
-        if variable == "offset":
             pass
         if variable in kwargs:
             if isinstance(kwargs[variable], dict):
@@ -68,7 +85,8 @@ def populate_class_from_dict(
             setattr(obj, variable, value)
 
 
-def update_obj_from_dict(obj, data, **kwargs):
+def update_obj_from_dict(obj: Any, data: dict, **kwargs):
+    """Set obj attributes to all items form data and kwargs."""
     if data:
         kwargs.update(**data)
 
@@ -80,47 +98,64 @@ def update_obj_from_dict(obj, data, **kwargs):
 
 
 def get_cls_origin(cls: type) -> type:
+    """Get the __origin__ of the class if exist or the class itself.
+
+    Example:
+    -------
+    get_cls_base(Variation[int]) -> Variation
+    """
     if hasattr(cls, "__origin__"):
         return cls.__origin__  # type: ignore
     return cls
 
 
 def get_cls_base(cls: type) -> type:
+    """Return base class of the class if exist or the class itself.
+
+    Example:
+    -------
+    get_cls_base(Variation[int]) -> int
+
+    """
     if hasattr(cls, "__origin__") and hasattr(cls, "__args__"):
         return get_cls_base(cls.__args__[0])  # type: ignore
 
     return cls
 
 
-def convert_list_to_floats(lst):
-    """Convert a list of string to int or float if possible."""
-    new_lst = []
-    for item in lst:
-        if not isinstance(item, str):
-            new_lst.append(item)
-            continue
-        try:
-            new_lst.append(int(item))
-            continue
-        except ValueError:
-            pass
-        try:
-            new_lst.append(float(item))
-            continue
-        except ValueError:
-            pass
-        new_lst.append(item)
-    return new_lst
+# def convert_list_to_floats(lst: List[Union[str, Any]]):
+#     """Convert a list of string to int or float if possible."""
+#     return [convert_value_to_numeric(v) for v in lst]
+
+
+# def convert_value_to_numeric(value: Union[str, Any]):
+#     """If str is provided convert it to int or float, otherwise return itself."""
+#     if not isinstance(value, str):
+#         return value
+#     try:
+#         if value.isdigit():
+#             return int(value)
+#         if value.replace('.', '').isdigit():
+#             return float(value)
+#     except ValueError:
+#         pass
+#     return value
 
 
 def convert_value_known_class(value: Any, cls: Optional[type] = None):
+    """Given a cls and value of it, try to convert the value to this class.
+
+    Example:
+    -------
+    - convert_value_known_class(1, int) -> 1
+    - convert_value_known_class(1.2, int) -> 1
+    - convert_value_known_class({'param1': 123}, ExampleClass) ->
+        ExampleClass(param1=123)
+    """
     if cls is None or value is None:
         return value
 
     cls_base = get_cls_base(cls)
-
-    # if isinstance(value, list):
-    # value = convert_list_to_floats(value)
 
     if isinstance(value, dict):
         if hasattr(cls_base, '__annotations__'):
