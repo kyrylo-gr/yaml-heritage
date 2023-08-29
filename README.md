@@ -27,8 +27,8 @@ This `example.ipynb` can be found in the examples folder.
   param1: 1.1
   param2: 2.5
   param3:
-  subparam: abc
-  param1: 2.3
+    subparam: abc
+    param1: 2.3
   ```
 
 - Load the parameters from the YAML file into the classes
