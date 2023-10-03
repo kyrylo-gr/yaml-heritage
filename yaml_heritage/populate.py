@@ -11,7 +11,7 @@ def inherit_annotations(cls) -> Dict[str, type]:
     Therefore we need to go through all parents and collect all annotations.
     """
     annotations = {}
-    mro = cls.__mro__ if hasattr(cls, '__mro__') else cls.__class__.__mro__
+    mro = cls.__mro__ if hasattr(cls, "__mro__") else cls.__class__.__mro__
     for parent in mro[::-1]:
         annotations.update(getattr(parent, "__annotations__", {}))
     annotations.update(cls.__annotations__)
@@ -61,7 +61,8 @@ def populate_class_from_dict(
 
             cls_origin = get_cls_origin(cls_name)
             if cls_origin is Variable and set_variable_func is not None:
-                value = set_variable_func(variable, value)
+                variable_name = get_cls_second_base(cls_name)
+                value = set_variable_func(variable, value, name=variable_name)
             if cls_origin is Variation:
                 default_value = value
                 value = Variation()
@@ -78,7 +79,7 @@ def populate_class_from_dict(
                         data=data,
                     )
 
-                    value.append(variation_value, times=data['times'])
+                    value.append(variation_value, times=data["times"])
 
                     variation_index += 1
 
@@ -123,6 +124,13 @@ def get_cls_base(cls: type) -> type:
     return cls
 
 
+def get_cls_second_base(cls: type) -> str:
+    if hasattr(cls, "__origin__") and hasattr(cls, "__args__"):
+        return cls.__args__[1]  # type: ignore
+
+    return None
+
+
 # def convert_list_to_floats(lst: List[Union[str, Any]]):
 #     """Convert a list of string to int or float if possible."""
 #     return [convert_value_to_numeric(v) for v in lst]
@@ -158,7 +166,7 @@ def convert_value_known_class(value: Any, cls: Optional[type] = None):
     cls_base = get_cls_base(cls)
 
     if isinstance(value, dict):
-        if hasattr(cls_base, '__annotations__'):
+        if hasattr(cls_base, "__annotations__"):
             needed_key = inherit_annotations(cls_base).keys()
             value = {k: value[k] for k in (value.keys() & needed_key)}
 
